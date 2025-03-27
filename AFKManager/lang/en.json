@@ -6,8 +6,8 @@
   "ChatWarningKickMessage": "You're {darkred}Idle/AFK{default}. Move or you'll be {lime}kicked{default} in {lightblue}{timeAmount}{default} seconds.",
   "ChatWarningMoveMessage": "You're {darkred}Idle/AFK{default}. Move or you'll be {lime}moved{default} to SPEC in {lightblue}{timeAmount}{default} seconds.",
   "ChatWarningKillMessage": "You're {darkred}Idle/AFK{default}. Move or you'll be {lime}killed{default} in {lightblue}{timeAmount}{default} seconds.",
-  "AntiCampSlayMessage": "{grey}{playerName}{default} was {lime}slayed{default} for camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default}.",
-  "AntiCampSlapMessage": "{grey}{playerName}{default} was {lime}slapped{default} with {red}{slapAmount} damage{default} for camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default}.",
-  "AntiCampSlayWarningMessage": "Stop camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default} or you'll be {lime}slayed{default} in {lightblue}{timeAmount}{default} seconds.",
-  "AntiCampSlapWarningMessage": "Stop camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default} or you'll be {lime}slapped{default} with {red}{slapAmount} damage{default} in {lightblue}{timeAmount}{default} seconds."
+  "AntiCampSpecMessage": "{grey}{playerName}{default} was {lime}slayed{default} for camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default}.",
+  "AntiCampKickMessage": "{grey}{playerName}{default} was {lime}slapped{default} with {red}{slapAmount} damage{default} for camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default}.",
+  "AntiCampSpecWarningMessage": "It looks like you're using an AFK script. You'll be moved to {red}SPEC{default} in {lightblue}{timeAmount}{default} seconds.",
+  "AntiCampKickWarningMessage": "It looks like you're using an AFK script. You'll be {darkred}kicked{default} in {lightblue}{timeAmount}{default} seconds."
 }

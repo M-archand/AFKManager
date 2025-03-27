@@ -12,6 +12,7 @@ public class AFKManagerConfig : BasePluginConfig
 {
     public int AfkPunishAfterWarnings { get; set; } = 3;
     public int AfkPunishment { get; set; } = 1;
+    public int AfkKickMinPlayers { get; set; } = 5;
     public float AfkWarnInterval { get; set; } = 5.0f;
     public float SpecWarnInterval { get; set; } = 20.0f;
     public int SpecKickAfterWarnings { get; set; } = 5;
@@ -22,6 +23,7 @@ public class AFKManagerConfig : BasePluginConfig
     public List<string> AntiCampSkipFlag { get; set; } = [..new[] { "@css/root", "@css/ban" }];
     public string PlaySoundName { get; set; } = "ui/panorama/popup_reveal_01";
     public bool SkipWarmup { get; set; } = false;
+    public int AntiCampMinPlayers { get; set; } = 5;
     public float AntiCampRadius { get; set; } = 130.0f;
     public int AntiCampPunishment { get; set; } = 1;
     public int AntiCampSlapDamage { get; set; } = 0;
@@ -35,7 +37,7 @@ public class AFKManagerConfig : BasePluginConfig
 public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
 {
     #region definitions
-    public override string ModuleAuthor => "NiGHT & K4ryuu (forked by Глеб Хлебов)";
+    public override string ModuleAuthor => "NiGHT & K4ryuu";
     public override string ModuleName => "AFK Manager";
     public override string ModuleVersion => "0.2.6";
     
@@ -52,7 +54,7 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
             Console.WriteLine($"{ModuleName}: AFKPunishment value is invalid, setting to default value (1).");
         }
 
-        if(Config.Timer < 0.1f)
+        if (Config.Timer < 0.1f)
         {                 
             Config.Timer = 5.0f;
             Console.WriteLine($"{ModuleName}: Timer value is invalid, setting to default value (5.0).");
@@ -64,7 +66,7 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
             Console.WriteLine($"{ModuleName}: The value of SpecWarnInterval is less than the value of Timer, SpecWarnInterval will be forced to {Config.Timer}");
         }
         
-        if(Config.AntiCampWarnInterval < Config.Timer)
+        if (Config.AntiCampWarnInterval < Config.Timer)
         {
             Config.AntiCampWarnInterval = Config.Timer;
             Console.WriteLine($"{ModuleName}: The value of AntiCampWarnInterval is less than the value of Timer, AntiCampWarnInterval will be forced to {Config.Timer}");
@@ -192,7 +194,7 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
         value.SpecWarningCount = 0;
         value.AfkWarningCount = 0;
                 
-        if(@event.Team != 1)
+        if (@event.Team != 1)
             value.MovedByPlugin = false;
         
         return HookResult.Continue;
@@ -210,7 +212,7 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
             if (player == null || !player.IsValid || player.LifeState != (byte)LifeState_t.LIFE_ALIVE)
                 return;
                 
-            if(!_gPlayerInfo.TryGetValue(player.Index, out var data))
+            if (!_gPlayerInfo.TryGetValue(player.Index, out var data))
                 return;
                 
             var angles = player.PlayerPawn.Value?.EyeAngles;
@@ -262,6 +264,10 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
                 
                 var angles = playerPawn?.EyeAngles;
                 var origin = player.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsOrigin;
+
+                // Check for minimum player count before proceeding
+                if (playersCount < Config.AfkKickMinPlayers)
+                    continue;
                 
                 /*  ------------------------------------------->  <-------------------------------------------  */
                 if (Config.AfkPunishAfterWarnings != 0
@@ -281,19 +287,16 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
                             case 0:
                                 Server.PrintToChatAll(ReplaceVars(player, Localizer["ChatKillMessage"].Value));
                                 playerPawn?.CommitSuicide(false, true);
-                                
                                 break;
                             case 1:
                                 Server.PrintToChatAll(ReplaceVars(player, Localizer["ChatMoveMessage"].Value));
                                 playerPawn?.CommitSuicide(false, true);
                                 player.ChangeTeam(CsTeam.Spectator);
                                 data.MovedByPlugin = true;
-                                
                                 break;
                             case 2:
                                 Server.PrintToChatAll(ReplaceVars(player, Localizer["ChatKickMessage"].Value));
                                 Server.ExecuteCommand($"kickid {player.UserId}");
-                                
                                 break;
                         }
                         
@@ -308,11 +311,9 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
                         case 0:
                             player.PrintToChat(ReplaceVars(player, Localizer["ChatWarningKillMessage"].Value, Config.AfkPunishAfterWarnings * Config.AfkWarnInterval - data.AfkWarningCount * Config.AfkWarnInterval));
                         break;
-
                         case 1:
                             player.PrintToChat(ReplaceVars(player, Localizer["ChatWarningMoveMessage"].Value, Config.AfkPunishAfterWarnings * Config.AfkWarnInterval - data.AfkWarningCount * Config.AfkWarnInterval));
                             break;
-
                         case 2:
                             player.PrintToChat(ReplaceVars(player, Localizer["ChatWarningKickMessage"].Value, Config.AfkPunishAfterWarnings * Config.AfkWarnInterval - data.AfkWarningCount * Config.AfkWarnInterval));
                             break;
@@ -335,6 +336,9 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
                                            && !(Config.AntiCampSkipFlag.Count >= 1 && AdminManager.PlayerHasPermissions(player, Config.AntiCampSkipFlag.ToArray()))
                                            && player.TeamNum != Config.AntiCampSkipTeam)
                 {
+                    if (playersCount < Config.AntiCampMinPlayers)
+                        continue;
+                    
                     if (CalculateDistance(data.Origin, origin) < Config.AntiCampRadius)
                     {
                         data.AntiCampTime += Config.Timer;
@@ -347,14 +351,14 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
                             switch (Config.AntiCampPunishment)
                             {
                                 case 0:
-                                    Server.PrintToChatAll(ReplaceVars(player, Localizer["AntiCampSlayMessage"].Value));
-
+                                    Server.PrintToChatAll(ReplaceVars(player, Localizer["AntiCampSpecMessage"].Value));
                                     playerPawn?.CommitSuicide(false, true);
+                                    player.ChangeTeam(CsTeam.Spectator);
+                                    data.MovedByPlugin = true;
                                     break;
                                 case 1:
-                                    Server.PrintToChatAll(ReplaceVars(player, Localizer["AntiCampSlapMessage"].Value));
-
-                                    Slap(playerPawn, Config.AntiCampSlapDamage);
+                                    Server.PrintToChatAll(ReplaceVars(player, Localizer["AntiCampKickMessage"].Value));
+                                    Server.ExecuteCommand($"kickid {player.UserId}");
                                     break;
                             }
                             
@@ -367,10 +371,10 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
                         switch (Config.AntiCampPunishment)
                         {
                             case 0:
-                                player.PrintToChat(ReplaceVars(player, Localizer["AntiCampSlayWarningMessage"].Value, Config.AntiCampPunishAfterWarnings * Config.AntiCampWarnInterval - data.AntiCampWarningCount * Config.AntiCampWarnInterval));
+                                player.PrintToChat(ReplaceVars(player, Localizer["AntiCampSpecWarningMessage"].Value, Config.AntiCampPunishAfterWarnings * Config.AntiCampWarnInterval - data.AntiCampWarningCount * Config.AntiCampWarnInterval));
                                 break;
                             case 1:
-                                player.PrintToChat(ReplaceVars(player, Localizer["AntiCampSlapWarningMessage"].Value, Config.AntiCampPunishAfterWarnings * Config.AntiCampWarnInterval - data.AntiCampWarningCount * Config.AntiCampWarnInterval));
+                                player.PrintToChat(ReplaceVars(player, Localizer["AntiCampKickWarningMessage"].Value, Config.AntiCampPunishAfterWarnings * Config.AntiCampWarnInterval - data.AntiCampWarningCount * Config.AntiCampWarnInterval));
                                 break;
                         }
                             
@@ -400,7 +404,7 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
                 && player.TeamNum == 1
                 && playersCount >= Config.SpecKickMinPlayers)
             {
-                if((Config.SpecKickOnlyMovedByPlugin && !data.MovedByPlugin) || (Config.SpecSkipFlag.Count >= 1 && AdminManager.PlayerHasPermissions(player, Config.SpecSkipFlag.ToArray())))
+                if ((Config.SpecKickOnlyMovedByPlugin && !data.MovedByPlugin) || (Config.SpecSkipFlag.Count >= 1 && AdminManager.PlayerHasPermissions(player, Config.SpecSkipFlag.ToArray())))
                     continue;
                 
                 data.SpecAfkTime += Config.Timer;
@@ -451,32 +455,6 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
     {
         return Localizer["ChatPrefix"] + message.Replace("{playerName}", player.PlayerName)
                       .Replace("{teamColor}", GetTeamColor(player.Team))
-                      .Replace("{weaponName}", player.PlayerPawn?.Value?.WeaponServices?.ActiveWeapon?.Value?.DesignerName ?? "Unknown")
-                      .Replace("{timeAmount}", $"{timeAmount:F1}")
-                      .Replace("{slapAmount}", Config.AntiCampSlapDamage.ToString())
-                      .Replace("{zoneName}", player.PlayerPawn?.Value?.LastPlaceName ?? "Unknown");
-    }
-    
-    private static void Slap(CBasePlayerPawn? pawn, int damage = 0)
-    {
-        if (pawn == null || pawn.Health <= 0)
-            return;
-
-        pawn.Health -= damage;
-
-        if (pawn.Health <= 0)
-        {
-            pawn.CommitSuicide(true, true);
-            return;
-        }
-        
-        Random random = new();
-        Vector vel = new(pawn.AbsVelocity.X, pawn.AbsVelocity.Y, pawn.AbsVelocity.Z);
-
-        vel.X += (random.Next(180) + 50) * (random.Next(2) == 1 ? -1 : 1);
-        vel.Y += (random.Next(180) + 50) * (random.Next(2) == 1 ? -1 : 1);
-        vel.Z += random.Next(200) + 100;
-
-        pawn.Teleport(pawn.AbsOrigin, pawn.AbsRotation, vel);
+                      .Replace("{timeAmount}", $"{timeAmount:F1}");
     }
 }
