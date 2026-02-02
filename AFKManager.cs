@@ -5,6 +5,7 @@ using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace AFKManager;
 
@@ -18,9 +19,10 @@ public class AFKManagerConfig : BasePluginConfig
     public int SpecKickAfterWarnings { get; set; } = 5;
     public int SpecKickMinPlayers { get; set; } = 5;
     public bool SpecKickOnlyMovedByPlugin { get; set; } = false;
-    public List<string> SpecSkipFlag { get; set; } = [..new[] { "@css/root", "@css/ban" }];
-    public List<string> AfkSkipFlag { get; set; } = [..new[] { "@css/root", "@css/ban" }];
-    public List<string> AntiCampSkipFlag { get; set; } = [..new[] { "@css/root", "@css/ban" }];
+    public List<string> SpecSkipFlag { get; set; } = new List<string> { "@css/root", "@css/ban" };
+    public List<string> AfkSkipFlag { get; set; } = new List<string> { "@css/root", "@css/ban" };
+    public List<string> AntiCampSkipFlag { get; set; } = new List<string> { "@css/root", "@css/ban" };
+
     public string PlaySoundName { get; set; } = "ui/panorama/popup_reveal_01";
     public bool SkipWarmup { get; set; } = false;
     public int AntiCampMinPlayers { get; set; } = 5;
@@ -51,31 +53,31 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
         if (Config.AfkPunishment is < 0 or > 2)
         {
             Config.AfkPunishment = 1;
-            Console.WriteLine($"{ModuleName}: AFKPunishment value is invalid, setting to default value (1).");
+            Logger.LogWarning($"{ModuleName}: AFKPunishment value is invalid, setting to default value (1).");
         }
 
         if (Config.Timer < 0.1f)
         {                 
             Config.Timer = 5.0f;
-            Console.WriteLine($"{ModuleName}: Timer value is invalid, setting to default value (5.0).");
+            Logger.LogWarning($"{ModuleName}: Timer value is invalid, setting to default value (5.0).");
         }
 
         if (Config.SpecWarnInterval < Config.Timer)
         {
             Config.SpecWarnInterval = Config.Timer;
-            Console.WriteLine($"{ModuleName}: The value of SpecWarnInterval is less than the value of Timer, SpecWarnInterval will be forced to {Config.Timer}");
+            Logger.LogWarning($"{ModuleName}: The value of SpecWarnInterval is less than the value of Timer, SpecWarnInterval will be forced to {Config.Timer}");
         }
         
         if (Config.AntiCampWarnInterval < Config.Timer)
         {
             Config.AntiCampWarnInterval = Config.Timer;
-            Console.WriteLine($"{ModuleName}: The value of AntiCampWarnInterval is less than the value of Timer, AntiCampWarnInterval will be forced to {Config.Timer}");
+            Logger.LogWarning($"{ModuleName}: The value of AntiCampWarnInterval is less than the value of Timer, AntiCampWarnInterval will be forced to {Config.Timer}");
         }
         
         if (Config.AntiCampPunishment is < 0 or > 1)
         {
             Config.AfkPunishment = 1;
-            Console.WriteLine($"{ModuleName}: AntiCampPunishment value is invalid, setting to default value (1).");
+            Logger.LogWarning($"{ModuleName}: AntiCampPunishment value is invalid, setting to default value (1).");
         }
         
         AddTimer(Config.Timer, AfkTimer_Callback, TimerFlags.REPEAT);
@@ -249,7 +251,7 @@ public class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
         var playersCount = players.Count;
         
         foreach (var player in players)
-        {
+        { 
             if (player.ControllingBot || !_gPlayerInfo.TryGetValue(player.Index, out var data))
                 continue;
             
