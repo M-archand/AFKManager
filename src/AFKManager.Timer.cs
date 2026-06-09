@@ -21,13 +21,20 @@ public partial class AFKManager
                 return;
             }
 
-            if (_gGameRulesProxy.GameRules!.FreezePeriod)
+            var gameRules = _gGameRulesProxy.GameRules;
+            if (gameRules == null)
+            {
+                DebugLog("AFK timer tick skipped: game rules unavailable.");
+                return;
+            }
+
+            if (gameRules.FreezePeriod)
             {
                 DebugLog("AFK timer tick skipped: freeze period active.");
                 return;
             }
 
-            if (Config.SkipWarmup && _gGameRulesProxy.GameRules!.WarmupPeriod)
+            if (Config.SkipWarmup && gameRules.WarmupPeriod)
             {
                 DebugLog("AFK timer tick skipped: warmup active.");
                 return;
@@ -55,7 +62,7 @@ public partial class AFKManager
 
                     var shouldCheckAntiCamp = Config.AntiCampPunishAfterWarnings != 0
                                               && playersCount >= Config.AntiCampMinPlayers
-                                              && !(Config.AntiCampSkipBombPlanted && _gGameRulesProxy.GameRules!.BombPlanted)
+                                              && !(Config.AntiCampSkipBombPlanted && gameRules.BombPlanted)
                                               && !(Config.AntiCampSkipFlag.Count >= 1 && AdminManager.PlayerHasPermissions(player, _antiCampSkipFlags))
                                               && player.TeamNum != Config.AntiCampSkipTeam;
 
@@ -68,9 +75,10 @@ public partial class AFKManager
                         continue;
                     }
 
-                    var origin = player.PlayerPawn.Value?.CBodyComponent?.SceneNode?.AbsOrigin;
+                    var origin = playerPawn.CBodyComponent?.SceneNode?.AbsOrigin;
                     var originVector = ToVector3(origin);
                     var allowAntiCampChecks = shouldCheckAntiCamp;
+                    var afkWarnedThisTick = false;
 
                     if (shouldCheckAfk)
                     {
@@ -164,6 +172,7 @@ public partial class AFKManager
 
                                 data.AfkTime = 0;
                                 data.AfkWarningCount++;
+                                afkWarnedThisTick = true;
                             }
                         }
                         else
@@ -179,7 +188,7 @@ public partial class AFKManager
                         data.Angles = Vector3.Zero;
                     }
 
-                    if (allowAntiCampChecks && data.AfkWarningCount == 0)
+                    if (allowAntiCampChecks && !afkWarnedThisTick)
                     {
                         if (CalculateDistance2D(data.Origin, originVector) < Config.AntiCampRadius)
                         {
