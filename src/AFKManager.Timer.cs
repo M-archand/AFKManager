@@ -137,11 +137,12 @@ public partial class AFKManager
                                 {
                                     case 0:
                                         Server.PrintToChatAll(ReplaceVars(player, Localizer["ChatKillMessage"].Value));
-                                        playerPawn?.CommitSuicide(false, true);
+                                        if (playerPawn is { IsValid: true })
+                                            playerPawn.CommitSuicide(false, true);
                                         break;
                                     case 1:
                                         Server.PrintToChatAll(ReplaceVars(player, Localizer["ChatMoveMessage"].Value));
-                                        if (playerPawn != null)
+                                        if (playerPawn is { IsValid: true })
                                         {
                                             playerPawn.CommitSuicide(false, true);
                                             player.ChangeTeam(CsTeam.Spectator);
@@ -150,7 +151,7 @@ public partial class AFKManager
                                         break;
                                     case 2:
                                         Server.PrintToChatAll(ReplaceVars(player, Localizer["ChatKickMessage"].Value));
-                                        if (player.UserId.HasValue && player.UserId >= 0)
+                                        if (player.UserId is >= 0 and <= 65535)
                                             Server.ExecuteCommand($"kickid {player.UserId}");
                                         break;
                                 }
@@ -209,7 +210,7 @@ public partial class AFKManager
                                     {
                                         case 1:
                                             Server.PrintToChatAll(ReplaceVars(player, Localizer["AntiCampSpecMessage"].Value));
-                                            if (playerPawn != null)
+                                            if (playerPawn is { IsValid: true })
                                             {
                                                 playerPawn.CommitSuicide(false, true);
                                                 player.ChangeTeam(CsTeam.Spectator);
@@ -218,7 +219,7 @@ public partial class AFKManager
                                             break;
                                         case 2:
                                             Server.PrintToChatAll(ReplaceVars(player, Localizer["AntiCampKickMessage"].Value));
-                                            if (player.UserId.HasValue && player.UserId >= 0)
+                                            if (player.UserId is >= 0 and <= 65535)
                                                 Server.ExecuteCommand($"kickid {player.UserId}");
                                             break;
                                     }
@@ -267,6 +268,9 @@ public partial class AFKManager
                     && player.TeamNum == 1
                     && playersCount >= Config.SpecKickMinPlayers)
                 {
+                    if (!player.IsValid)
+                        continue;
+
                     if ((Config.SpecKickOnlyMovedByPlugin && !data.MovedByPlugin) || (Config.SpecSkipFlag.Count >= 1 && AdminManager.PlayerHasPermissions(player, _specSkipFlags)))
                         continue;
 
@@ -278,7 +282,7 @@ public partial class AFKManager
                     if (data.SpecWarningCount >= Config.SpecKickAfterWarnings)
                     {
                         Server.PrintToChatAll(ReplaceVars(player, Localizer["SpecKickMessage"].Value));
-                        if (player.UserId.HasValue && player.UserId >= 0)
+                        if (player.UserId is >= 0 and <= 65535)
                             Server.ExecuteCommand($"kickid {player.UserId}");
 
                         data.SpecWarningCount = 0;
