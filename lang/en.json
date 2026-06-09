@@ -1,13 +1,15 @@
 ﻿{
   "ChatPrefix": "{purple}[AFK]{default} » ",
-  "ChatKickMessage": "{grey}{playerName}{default} was {lime}kicked{default} for being {darkred}AFK{default}.",
-  "ChatMoveMessage": "{grey}{playerName}{default} was {lime}moved{default} to SPEC being {darkred}AFK{default}.",
-  "ChatKillMessage": "{grey}{playerName}{default} was {lime}killed{default} for being {darkred}AFK{default}.",
-  "ChatWarningKickMessage": "You're {darkred}Idle/AFK{default}. Move or you'll be {lime}kicked{default} in {lightblue}{timeAmount}{default} seconds.",
-  "ChatWarningMoveMessage": "You're {darkred}Idle/AFK{default}. Move or you'll be {lime}moved{default} to SPEC in {lightblue}{timeAmount}{default} seconds.",
-  "ChatWarningKillMessage": "You're {darkred}Idle/AFK{default}. Move or you'll be {lime}killed{default} in {lightblue}{timeAmount}{default} seconds.",
-  "AntiCampSpecMessage": "{grey}{playerName}{default} was {lime}slayed{default} for camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default}.",
-  "AntiCampKickMessage": "{grey}{playerName}{default} was {lime}slapped{default} with {red}{slapAmount} damage{default} for camping in {green}@{zoneName}{default} with weapon {lime}{weaponName}{default}.",
+  "ChatKickMessage": "{grey}{playerName}{default} was {lime}kicked{default} for being {lightred}AFK{default}.",
+  "ChatMoveMessage": "{grey}{playerName}{default} was {lime}moved{default} to SPEC being {lightred}AFK{default}.",
+  "ChatKillMessage": "{grey}{playerName}{default} was {lime}killed{default} for being {lightred}AFK{default}.",
+  "ChatWarningKickMessage": "You're {lightred}Idle/AFK{default}. Move or you'll be {lime}kicked{default} in {lightblue}{timeAmount}{default} seconds.",
+  "ChatWarningMoveMessage": "You're {lightred}Idle/AFK{default}. Move or you'll be {lime}moved{default} to SPEC in {lightblue}{timeAmount}{default} seconds.",
+  "ChatWarningKillMessage": "You're {lightred}Idle/AFK{default}. Move or you'll be {lime}killed{default} in {lightblue}{timeAmount}{default} seconds.",
+  "AntiCampSpecMessage": "{grey}{playerName}{default} was {lime}moved to spectator{default} for {lightred}camping{default}.",
+  "AntiCampKickMessage": "{grey}{playerName}{default} was {lime}kicked{default} for {lightred}camping{default}.",
   "AntiCampSpecWarningMessage": "It looks like you're using an AFK script. You'll be moved to {red}SPEC{default} in {lightblue}{timeAmount}{default} seconds.",
-  "AntiCampKickWarningMessage": "It looks like you're using an AFK script. You'll be {darkred}kicked{default} in {lightblue}{timeAmount}{default} seconds."
+  "AntiCampKickWarningMessage": "It looks like you're using an AFK script. You'll be {lightred}kicked{default} in {lightblue}{timeAmount}{default} seconds.",
+  "SpecKickMessage": "{grey}{playerName}{default} was {lime}kicked{default} for being {lightred}idle in spectator{default}.",
+  "SpecKickWarningMessage": "You're {lightred}idle in spectator{default}. You'll be {lime}kicked{default} in {lightblue}{timeAmount}{default} seconds."
 }
