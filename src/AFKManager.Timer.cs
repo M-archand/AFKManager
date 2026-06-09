@@ -40,11 +40,18 @@ public partial class AFKManager
                 return;
             }
 
-            var players = Utilities.GetPlayers().Where(x => x is { IsBot: false, Connected: PlayerConnectedState.Connected }).ToList();
-            var playersCount = players.Count;
+            var allPlayers = Utilities.GetPlayers();
 
-            foreach (var player in players)
+            static bool IsEligible(CCSPlayerController p) => p is { IsBot: false, Connected: PlayerConnectedState.Connected };
+
+            var playersCount = 0;
+            foreach (var p in allPlayers)
+                if (IsEligible(p)) playersCount++;
+
+            foreach (var player in allPlayers)
             {
+                if (!IsEligible(player)) continue;
+
                 var data = GetOrCreatePlayerInfo((uint)player.Slot);
 
                 if (player is { LifeState: (byte)LifeState_t.LIFE_ALIVE, Team: CsTeam.Terrorist or CsTeam.CounterTerrorist })
