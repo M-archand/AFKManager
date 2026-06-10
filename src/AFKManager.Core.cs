@@ -15,6 +15,7 @@ public partial class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
     public required AFKManagerConfig Config { get; set; }
     private CCSGameRulesProxy? _gGameRulesProxy;
     private CounterStrikeSharp.API.Modules.Timers.Timer? _afkTimer;
+    private DateTime _lastTick;
     private string[] _afkSkipFlags = [];
     private string[] _antiCampSkipFlags = [];
     private string[] _specSkipFlags = [];
@@ -79,12 +80,14 @@ public partial class AFKManager : BasePlugin, IPluginConfig<AFKManagerConfig>
         if (_afkTimer != null)
         {
             _afkTimer.Kill();
+            _lastTick = DateTime.UtcNow;
             _afkTimer = AddTimer(Config.Timer, AfkTimer_Callback, TimerFlags.REPEAT);
         }
     }
 
     public override void Load(bool hotReload)
     {
+        _lastTick = DateTime.UtcNow;
         _afkTimer = AddTimer(Config.Timer, AfkTimer_Callback, TimerFlags.REPEAT);
 
         if (hotReload)

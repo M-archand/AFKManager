@@ -40,6 +40,10 @@ public partial class AFKManager
                 return;
             }
 
+            var now = DateTime.UtcNow;
+            var delta = Math.Clamp((float)(now - _lastTick).TotalSeconds, 0f, Config.Timer * 4f);
+            _lastTick = now;
+
             var allPlayers = Utilities.GetPlayers();
 
             static bool IsEligible(CCSPlayerController p) => p is { IsBot: false, Connected: PlayerConnectedState.Connected };
@@ -125,7 +129,7 @@ public partial class AFKManager
 
                         if (isStationary)
                         {
-                            data.AfkTime += Config.Timer;
+                            data.AfkTime += delta;
 
                             if (data.AfkTime < Config.AfkWarnInterval)
                             {
@@ -200,7 +204,7 @@ public partial class AFKManager
                     {
                         if (CalculateDistance2D(data.Origin, originVector) < Config.AntiCampRadius)
                         {
-                            data.AntiCampTime += Config.Timer;
+                            data.AntiCampTime += delta;
 
                             if (data.AntiCampTime >= Config.AntiCampWarnInterval)
                             {
@@ -274,7 +278,7 @@ public partial class AFKManager
                     if ((Config.SpecKickOnlyMovedByPlugin && !data.MovedByPlugin) || (Config.SpecSkipFlag.Count >= 1 && AdminManager.PlayerHasPermissions(player, _specSkipFlags)))
                         continue;
 
-                    data.SpecAfkTime += Config.Timer;
+                    data.SpecAfkTime += delta;
 
                     if (!(data.SpecAfkTime >= Config.SpecWarnInterval))
                         continue;
