@@ -65,7 +65,19 @@ public partial class AFKManager
                     var playerFlags = playerPawn.Flags;
 
                     if ((playerFlags & ((uint)PlayerFlags.FL_ONGROUND | (uint)PlayerFlags.FL_FROZEN)) != (uint)PlayerFlags.FL_ONGROUND)
+                    {
+                        // If airborne or frozen, AFK/anti-camp time does not accumulate
+                        var airborneOrigin = ToVector3(playerPawn.CBodyComponent?.SceneNode?.AbsOrigin);
+
+                        if (CalculateDistance3D(data.Origin, airborneOrigin) > Config.AfkPositionTolerance)
+                        {
+                            data.AfkTime = 0;
+                            data.AfkWarningCount = 0;
+                        }
+
+                        data.Origin = airborneOrigin;
                         continue;
+                    }
 
                     var shouldCheckAfk = Config.AfkPunishAfterWarnings != 0
                                          && playersCount >= Config.AfkKickMinPlayers
@@ -93,7 +105,7 @@ public partial class AFKManager
 
                     if (shouldCheckAfk)
                     {
-                        var positionDelta = CalculateDistance2D(data.Origin, originVector);
+                        var positionDelta = CalculateDistance3D(data.Origin, originVector);
                         var pitchDelta = 0.0f;
                         var yawDelta = 0.0f;
                         var isStationary = positionDelta <= Config.AfkPositionTolerance;
@@ -120,7 +132,7 @@ public partial class AFKManager
                             DebugLog(
                                 $"Checked player: {player.PlayerName}. " +
                                 $"Position:       {FormatPosition(originVector)}. " +
-                                $"PosDelta2D:     {positionDelta:F3}. " +
+                                $"PosDelta3D:     {positionDelta:F3}. " +
                                 $"PitchDelta:     {(Config.UseEyeAngles ? $"{pitchDelta:F3}" : "disabled")}. " +
                                 $"YawDelta:       {(Config.UseEyeAngles ? $"{yawDelta:F3}" : "disabled")}. " +
                                 $"Stationary:     {isStationary}. " +

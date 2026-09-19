@@ -26,6 +26,15 @@ public partial class AFKManager
         return MathF.Sqrt(dx * dx + dy * dy);
     }
 
+    private static float CalculateDistance3D(Vector3 point1, Vector3 point2)
+    {
+        var dx = point2.X - point1.X;
+        var dy = point2.Y - point1.Y;
+        var dz = point2.Z - point1.Z;
+
+        return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
     private static float CalculateAngleDelta(float previousAngle, float currentAngle)
     {
         var delta = ((currentAngle - previousAngle + 540f) % 360f) - 180f;
